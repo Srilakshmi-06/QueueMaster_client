@@ -158,7 +158,9 @@ const Signup = () => {
 
                         <div className='flex flex-row justify-center items-center gap-2 mt-2'>
                             <p>Already have an account?</p>
-                            <a href="/login" className='text-blue-800'>Login</a>
+                            <Link to="/login">
+                                <a className='text-blue-800'>Login</a>
+                            </Link>
                         </div>
                     </div>
 
