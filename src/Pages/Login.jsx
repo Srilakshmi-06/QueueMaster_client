@@ -20,7 +20,7 @@ const Login = () => {
 
         try {
             const res = await axios.post(
-                'http://localhost:5000/queuemaster/login',
+                'https://queuemaster-server-1.onrender.com/queuemaster/login',
                 { email, password }
             )
 
@@ -109,7 +109,7 @@ const Login = () => {
 
                         <div className='flex flex-row justify-center items-center gap-2 mt-2'>
                             <p>Don't have an account?</p>
-                            <button 
+                            <button
                                 onClick={() => navigate('/signup')}
                                 className='text-blue-800 hover:underline'
                             >

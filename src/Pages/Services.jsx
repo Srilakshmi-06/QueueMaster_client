@@ -15,19 +15,19 @@ const Services = () => {
     if (userData) {
       setUser(JSON.parse(userData))
     }
-    
+
     // Auto-refresh services every 15 seconds
     const interval = setInterval(() => {
       fetchServices()
     }, 15000)
-    
+
     return () => clearInterval(interval)
   }, [])
 
   const fetchServices = async () => {
     try {
       const token = localStorage.getItem('qmToken')
-      const res = await axios.get('http://localhost:5000/services', {
+      const res = await axios.get('https://queuemaster-server-1.onrender.com/services', {
         headers: { Authorization: `Bearer ${token}` }
       })
       setServices(res.data)
@@ -45,11 +45,11 @@ const Services = () => {
     try {
       const token = localStorage.getItem('qmToken')
       if (editingService) {
-        await axios.put(`http://localhost:5000/services/${editingService._id}`, formData, {
+        await axios.put(`https://queuemaster-server-1.onrender.com/services/${editingService._id}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         })
       } else {
-        await axios.post('http://localhost:5000/services', formData, {
+        await axios.post('https://queuemaster-server-1.onrender.com/services', formData, {
           headers: { Authorization: `Bearer ${token}` }
         })
       }
@@ -72,7 +72,7 @@ const Services = () => {
     if (window.confirm('Are you sure you want to delete this service?')) {
       try {
         const token = localStorage.getItem('qmToken')
-        await axios.delete(`http://localhost:5000/services/${id}`, {
+        await axios.delete(`https://queuemaster-server-1.onrender.com/services/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         fetchServices()
@@ -94,7 +94,7 @@ const Services = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Services</h1>
         {user && user.role === 'admin' && (
-          <button 
+          <button
             onClick={() => setShowModal(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
           >
@@ -112,23 +112,22 @@ const Services = () => {
               <h2 className="text-lg font-semibold">{service.name}</h2>
             </div>
             <p className="text-gray-600 text-sm mb-4">{service.description}</p>
-            
+
             <div className="flex justify-between items-center">
-              <span className={`px-2 py-1 text-xs rounded-full ${
-                service.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-              }`}>
+              <span className={`px-2 py-1 text-xs rounded-full ${service.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
                 {service.isActive ? 'Active' : 'Inactive'}
               </span>
-              
+
               {user && user.role === 'admin' && (
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     onClick={() => handleEdit(service)}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     <FaEdit />
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleDelete(service._id)}
                     className="text-red-600 hover:text-red-800"
                   >
@@ -148,48 +147,48 @@ const Services = () => {
             <h3 className="text-xl font-bold mb-4">
               {editingService ? 'Edit Service' : 'Add New Service'}
             </h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Service Name</label>
-                <input 
+                <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full p-2 border rounded"
                   placeholder="Service name"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea 
+                <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full p-2 border rounded h-20"
                   placeholder="Service description"
                 />
               </div>
-              
+
               <div className="flex items-center">
-                <input 
+                <input
                   type="checkbox"
                   checked={formData.isActive}
-                  onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                   className="mr-2"
                 />
                 <label className="text-sm">Active Service</label>
               </div>
             </div>
-            
+
             <div className="flex gap-3 mt-6">
-              <button 
+              <button
                 onClick={handleSubmit}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 {editingService ? 'Update' : 'Create'}
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setShowModal(false)
                   setEditingService(null)

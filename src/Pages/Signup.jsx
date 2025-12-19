@@ -31,7 +31,7 @@ const Signup = () => {
 
         try {
             const res = await axios.post(
-                'http://localhost:5000/queuemaster/signup',
+                'https://queuemaster-server-1.onrender.com/queuemaster/signup',
                 {
                     name,
                     email,
@@ -45,7 +45,7 @@ const Signup = () => {
             // ✅ success alert
             setStatus(true)
             setMessage("Signup successful 🎉 Redirecting to login...")
-            
+
             // redirect to login after short delay
             setTimeout(() => {
                 setStatus(false)

@@ -19,7 +19,7 @@ const Queuestatus = () => {
   const fetchQueueData = async () => {
     try {
       const token = localStorage.getItem('qmToken')
-      const res = await axios.get('http://localhost:5000/queue/status', {
+      const res = await axios.get('https://queuemaster-server-1.onrender.com/queue/status', {
         headers: { Authorization: `Bearer ${token}` }
       })
       setQueueData(res.data)
@@ -32,7 +32,7 @@ const Queuestatus = () => {
   const fetchUserTickets = async () => {
     try {
       const token = localStorage.getItem('qmToken')
-      const res = await axios.get('http://localhost:5000/queue/my-tickets', {
+      const res = await axios.get('https://queuemaster-server-1.onrender.com/queue/my-tickets', {
         headers: { Authorization: `Bearer ${token}` }
       })
       setUserTickets(res.data.filter(ticket => ticket.status !== 'completed'))
@@ -61,9 +61,8 @@ const Queuestatus = () => {
           {userActiveTicket ? (
             <>
               <p className="text-3xl font-bold text-gray-800">{userActiveTicket.tokenNumber}</p>
-              <p className={`text-sm font-medium ${
-                userActiveTicket.status === 'active' ? 'text-green-600' : 'text-yellow-600'
-              }`}>
+              <p className={`text-sm font-medium ${userActiveTicket.status === 'active' ? 'text-green-600' : 'text-yellow-600'
+                }`}>
                 {userActiveTicket.status === 'active' ? 'Being Served' : 'Waiting'}
               </p>
             </>
@@ -77,7 +76,7 @@ const Queuestatus = () => {
       <section className="bg-white p-6 rounded-xl shadow-md mb-6">
         <h2 className="text-lg font-semibold mb-4">Queue Progress</h2>
         <div className="h-6 w-full bg-gray-200 rounded-full">
-          <div 
+          <div
             className="h-6 bg-blue-500 rounded-full text-right text-white text-sm flex items-center justify-end pr-2"
             style={{ width: `${progress}%` }}
           >
@@ -92,20 +91,18 @@ const Queuestatus = () => {
         <h2 className="text-lg font-semibold mb-4">Current Queue</h2>
         <ul className="space-y-2 max-h-64 overflow-y-auto">
           {queueData.length > 0 ? queueData.map((ticket) => (
-            <li key={ticket._id} className={`flex justify-between p-3 rounded-lg shadow-sm ${
-              userActiveTicket && ticket._id === userActiveTicket._id 
-                ? 'bg-blue-100 border-2 border-blue-300' 
-                : 'bg-gray-100'
-            }`}>
+            <li key={ticket._id} className={`flex justify-between p-3 rounded-lg shadow-sm ${userActiveTicket && ticket._id === userActiveTicket._id
+              ? 'bg-blue-100 border-2 border-blue-300'
+              : 'bg-gray-100'
+              }`}>
               <span className="font-medium">{ticket.tokenNumber}</span>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">{ticket.service}</span>
-                <span className={`text-sm font-medium ${
-                  ticket.status === 'active' ? 'text-green-600' : 
+                <span className={`text-sm font-medium ${ticket.status === 'active' ? 'text-green-600' :
                   ticket.status === 'waiting' ? 'text-yellow-600' : 'text-gray-500'
-                }`}>
-                  {ticket.status === 'active' ? 'Being Served' : 
-                   ticket.status === 'waiting' ? 'Waiting' : ticket.status}
+                  }`}>
+                  {ticket.status === 'active' ? 'Being Served' :
+                    ticket.status === 'waiting' ? 'Waiting' : ticket.status}
                 </span>
               </div>
             </li>
@@ -121,8 +118,8 @@ const Queuestatus = () => {
         <div className="h-16 flex items-center justify-center bg-gray-100 rounded-lg">
           {userActiveTicket ? (
             <p className="text-gray-700 font-medium text-center">
-              {userActiveTicket.status === 'active' 
-                ? 'Your token is being served. Please proceed to the counter.' 
+              {userActiveTicket.status === 'active'
+                ? 'Your token is being served. Please proceed to the counter.'
                 : `You are position ${userActiveTicket.position} in the queue. Estimated wait: ${userActiveTicket.estimatedWaitTime} minutes.`
               }
             </p>

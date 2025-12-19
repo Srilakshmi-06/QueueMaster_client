@@ -14,19 +14,19 @@ const Announcements = () => {
         if (userData) {
             setUser(JSON.parse(userData))
         }
-        
+
         // Auto-refresh announcements every 10 seconds
         const interval = setInterval(() => {
             fetchAnnouncements()
         }, 10000)
-        
+
         return () => clearInterval(interval)
     }, [])
 
     const fetchAnnouncements = async () => {
         try {
             const token = localStorage.getItem('qmToken')
-            const res = await axios.get('http://localhost:5000/announcements', {
+            const res = await axios.get('https://queuemaster-server-1.onrender.com/announcements', {
                 headers: { Authorization: `Bearer ${token}` }
             })
             setAnnouncements(res.data)
@@ -38,7 +38,7 @@ const Announcements = () => {
     const createAnnouncement = async () => {
         try {
             const token = localStorage.getItem('qmToken')
-            await axios.post('http://localhost:5000/announcements', newAnnouncement, {
+            await axios.post('https://queuemaster-server-1.onrender.com/announcements', newAnnouncement, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             setShowCreateModal(false)
@@ -56,7 +56,7 @@ const Announcements = () => {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Announcements</h1>
                 {user && user.role === 'admin' && (
-                    <button 
+                    <button
                         onClick={() => setShowCreateModal(true)}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
                     >
@@ -89,12 +89,11 @@ const Announcements = () => {
                                 </span>
                             </div>
                             <p className="text-gray-600 text-sm mb-3">{announcement.message}</p>
-                            
+
                             <div className="flex justify-between items-center">
-                                <span className={`inline-block px-3 py-1 text-sm rounded-full ${
-                                    isHigh ? "bg-red-100 text-red-700" :
+                                <span className={`inline-block px-3 py-1 text-sm rounded-full ${isHigh ? "bg-red-100 text-red-700" :
                                     isMedium ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"
-                                }`}>
+                                    }`}>
                                     {announcement.priority.charAt(0).toUpperCase() + announcement.priority.slice(1)} Priority
                                 </span>
                                 {announcement.createdBy && (
@@ -117,34 +116,34 @@ const Announcements = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-xl max-w-md w-full mx-4">
                         <h3 className="text-xl font-bold mb-4">Create New Announcement</h3>
-                        
+
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">Title</label>
-                                <input 
+                                <input
                                     type="text"
                                     value={newAnnouncement.title}
-                                    onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
+                                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
                                     className="w-full p-2 border rounded"
                                     placeholder="Announcement title"
                                 />
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium mb-1">Message</label>
-                                <textarea 
+                                <textarea
                                     value={newAnnouncement.message}
-                                    onChange={(e) => setNewAnnouncement({...newAnnouncement, message: e.target.value})}
+                                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, message: e.target.value })}
                                     className="w-full p-2 border rounded h-24"
                                     placeholder="Announcement message"
                                 />
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium mb-1">Priority</label>
-                                <select 
+                                <select
                                     value={newAnnouncement.priority}
-                                    onChange={(e) => setNewAnnouncement({...newAnnouncement, priority: e.target.value})}
+                                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, priority: e.target.value })}
                                     className="w-full p-2 border rounded"
                                 >
                                     <option value="low">Low</option>
@@ -153,15 +152,15 @@ const Announcements = () => {
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div className="flex gap-3 mt-6">
-                            <button 
+                            <button
                                 onClick={createAnnouncement}
                                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                             >
                                 Create
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setShowCreateModal(false)}
                                 className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
                             >

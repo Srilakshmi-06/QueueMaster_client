@@ -29,7 +29,7 @@ const Todo = () => {
             alert("Enter Something!!")
             return;
         }
-        await axios.post("http://localhost:5000/todo/addtodo", { todo }, config);
+        await axios.post("https://queuemaster-server-1.onrender.com/todo/addtodo", { todo }, config);
         setTodo('')
         getTodo()
         setStatus(true)
@@ -37,12 +37,12 @@ const Todo = () => {
     }
 
     const getTodo = async () => {
-        const res = await axios.get("http://localhost:5000/todo/gettodo", config)
+        const res = await axios.get("https://queuemaster-server-1.onrender.com/todo/gettodo", config)
         setTodoArray(res.data)
     }
 
     const deleteTodo = async (id) => {
-        await axios.delete(`http://localhost:5000/todo/deletetodo/${id}`, config)
+        await axios.delete(`https://queuemaster-server-1.onrender.com/todo/deletetodo/${id}`, config)
         getTodo()
     }
 
@@ -54,7 +54,7 @@ const Todo = () => {
 
     const updateTodo = async (id, data) => {
         await axios.put(
-            `http://localhost:5000/todo/updatetodo/${id}`,
+            `https://queuemaster-server-1.onrender.com/todo/updatetodo/${id}`,
             { todo: data }, config
         );
         getTodo();
@@ -62,7 +62,7 @@ const Todo = () => {
 
     const toggleTodo = async (id) => {
         await axios.patch(
-            `http://localhost:5000/todo/toggle/${id}`,
+            `https://queuemaster-server-1.onrender.com/todo/toggle/${id}`,
             {},
             config
         );
@@ -118,8 +118,8 @@ const Todo = () => {
                             <button
                                 onClick={() => toggleTodo(r._id)}
                                 className={`transition ${r.completed
-                                        ? "text-green-600"
-                                        : "text-gray-400 hover:text-green-600"
+                                    ? "text-green-600"
+                                    : "text-gray-400 hover:text-green-600"
                                     }`}
                             >
                                 <FaCheckCircle size={18} />

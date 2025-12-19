@@ -9,31 +9,31 @@ const Notifications = () => {
 
   useEffect(() => {
     fetchNotifications()
-    
+
     // Auto-refresh notifications every 8 seconds
     const interval = setInterval(() => {
       fetchNotifications()
     }, 8000)
-    
+
     return () => clearInterval(interval)
   }, [])
 
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem('qmToken')
-      
+
       // Fetch user tickets for ticket-related notifications
-      const ticketsRes = await axios.get('http://localhost:5000/queue/my-tickets', {
+      const ticketsRes = await axios.get('https://queuemaster-server-1.onrender.com/queue/my-tickets', {
         headers: { Authorization: `Bearer ${token}` }
       })
       setUserTickets(ticketsRes.data)
-      
+
       // Fetch announcements for announcement notifications
-      const announcementsRes = await axios.get('http://localhost:5000/announcements', {
+      const announcementsRes = await axios.get('https://queuemaster-server-1.onrender.com/announcements', {
         headers: { Authorization: `Bearer ${token}` }
       })
       setAnnouncements(announcementsRes.data)
-      
+
       // Generate notifications based on data
       generateNotifications(ticketsRes.data, announcementsRes.data)
     } catch (err) {
@@ -43,7 +43,7 @@ const Notifications = () => {
 
   const generateNotifications = (tickets, announcements) => {
     const notifs = []
-    
+
     // Ticket notifications
     tickets.forEach(ticket => {
       if (ticket.status === 'active') {
@@ -62,7 +62,7 @@ const Notifications = () => {
         })
       }
     })
-    
+
     // Announcement notifications
     announcements.slice(0, 3).forEach(announcement => {
       notifs.push({
@@ -72,7 +72,7 @@ const Notifications = () => {
         type: announcement.priority === 'high' ? 'warning' : 'info'
       })
     })
-    
+
     setNotifications(notifs)
   }
 
@@ -81,7 +81,7 @@ const Notifications = () => {
     const past = new Date(date)
     const diffMs = now - past
     const diffMins = Math.floor(diffMs / 60000)
-    
+
     if (diffMins < 1) return 'Just now'
     if (diffMins < 60) return `${diffMins} mins ago`
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hours ago`
@@ -109,16 +109,15 @@ const Notifications = () => {
               className="flex items-start gap-3 bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition relative"
             >
               <AiOutlineBell
-                className={`text-xl mt-1 ${
-                  isSuccess ? "text-green-500" :
+                className={`text-xl mt-1 ${isSuccess ? "text-green-500" :
                   isWarning ? "text-yellow-500" : "text-blue-500"
-                }`}
+                  }`}
               />
               <div className="flex-1">
                 <p className="text-gray-800 text-sm pr-8">{notification.message}</p>
                 <span className="text-gray-500 text-xs">{notification.time}</span>
               </div>
-              <button 
+              <button
                 onClick={() => markAsRead(notification.id)}
                 className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
                 title="Mark as read"
@@ -134,10 +133,10 @@ const Notifications = () => {
           </div>
         )}
       </div>
-      
+
       {notifications.length > 0 && (
         <div className="mt-6 text-center">
-          <button 
+          <button
             onClick={() => setNotifications([])}
             className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
           >

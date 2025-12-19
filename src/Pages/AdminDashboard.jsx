@@ -22,7 +22,7 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('qmToken')
-      const res = await axios.get('http://localhost:5000/admin/stats', {
+      const res = await axios.get('https://queuemaster-server-1.onrender.com/admin/stats', {
         headers: { Authorization: `Bearer ${token}` }
       })
       setStats(res.data)
@@ -34,7 +34,7 @@ const AdminDashboard = () => {
   const fetchQueueData = async () => {
     try {
       const token = localStorage.getItem('qmToken')
-      const res = await axios.get('http://localhost:5000/queue/status', {
+      const res = await axios.get('https://queuemaster-server-1.onrender.com/queue/status', {
         headers: { Authorization: `Bearer ${token}` }
       })
       setQueueData(res.data)
@@ -46,22 +46,22 @@ const AdminDashboard = () => {
   const fetchRecentActivity = async () => {
     try {
       const token = localStorage.getItem('qmToken')
-      
+
       // Get all tickets sorted by creation date
-      const queueRes = await axios.get('http://localhost:5000/queue/status', {
+      const queueRes = await axios.get('https://queuemaster-server-1.onrender.com/queue/status', {
         headers: { Authorization: `Bearer ${token}` }
       })
-      
+
       // Get recent users
-      const usersRes = await axios.get('http://localhost:5000/admin/users', {
+      const usersRes = await axios.get('https://queuemaster-server-1.onrender.com/admin/users', {
         headers: { Authorization: `Bearer ${token}` }
       })
-      
+
       // Get announcements
-      const announcementsRes = await axios.get('http://localhost:5000/announcements', {
+      const announcementsRes = await axios.get('https://queuemaster-server-1.onrender.com/announcements', {
         headers: { Authorization: `Bearer ${token}` }
       })
-      
+
       generateActivityLog(queueRes.data, usersRes.data, announcementsRes.data)
     } catch (err) {
       console.error('Error fetching activity:', err)
@@ -70,7 +70,7 @@ const AdminDashboard = () => {
 
   const generateActivityLog = (tickets, users, announcements) => {
     const activities = []
-    
+
     // Recent tickets
     tickets.slice(0, 3).forEach(ticket => {
       activities.push({
@@ -78,7 +78,7 @@ const AdminDashboard = () => {
         text: `🎟️ Token ${ticket.tokenNumber} generated`,
         time: getTimeAgo(ticket.createdAt)
       })
-      
+
       if (ticket.status === 'completed' && ticket.completedAt) {
         activities.push({
           id: `completed-${ticket._id}`,
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
         })
       }
     })
-    
+
     // Recent users
     users.slice(0, 2).forEach(user => {
       activities.push({
@@ -96,7 +96,7 @@ const AdminDashboard = () => {
         time: getTimeAgo(user.createdAt || new Date())
       })
     })
-    
+
     // Recent announcements
     announcements.slice(0, 1).forEach(announcement => {
       activities.push({
@@ -105,7 +105,7 @@ const AdminDashboard = () => {
         time: getTimeAgo(announcement.createdAt)
       })
     })
-    
+
     // Sort by most recent and take top 4
     setRecentActivity(activities.slice(0, 4))
   }
@@ -115,7 +115,7 @@ const AdminDashboard = () => {
     const past = new Date(date)
     const diffMs = now - past
     const diffMins = Math.floor(diffMs / 60000)
-    
+
     if (diffMins < 1) return 'Just now'
     if (diffMins < 60) return `${diffMins}m ago`
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`
@@ -125,19 +125,19 @@ const AdminDashboard = () => {
   const checkSystemStatus = () => {
     const now = new Date()
     const lastBackup = new Date(now.getTime() - (2 * 60 * 60 * 1000)) // 2 hours ago
-    
+
     setSystemStatus({
       server: 'Online',
       database: 'Connected',
       queueSystem: 'Running',
-      lastBackup: lastBackup.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+      lastBackup: lastBackup.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     })
   }
 
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('qmToken')
-      const res = await axios.get('http://localhost:5000/admin/users', {
+      const res = await axios.get('https://queuemaster-server-1.onrender.com/admin/users', {
         headers: { Authorization: `Bearer ${token}` }
       })
       setUsers(res.data)
@@ -149,7 +149,7 @@ const AdminDashboard = () => {
   const handleTicketAction = async (action, tokenNumber) => {
     try {
       const token = localStorage.getItem('qmToken')
-      await axios.post(`http://localhost:5000/queue/${action}`, 
+      await axios.post(`https://queuemaster-server-1.onrender.com/queue/${action}`,
         { tokenNumber },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -162,7 +162,7 @@ const AdminDashboard = () => {
   }
 
   const handleQuickAction = (action) => {
-    switch(action) {
+    switch (action) {
       case 'users':
         setModalType('User Management')
         fetchUsers()
@@ -199,7 +199,7 @@ const AdminDashboard = () => {
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-4">System Overview</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          
+
           <div className="bg-white p-6 rounded-xl shadow-md">
             <p className="text-sm text-gray-500">Total Users</p>
             <h3 className="text-3xl font-bold text-blue-600 mt-2">{stats.totalUsers}</h3>
@@ -306,22 +306,21 @@ const AdminDashboard = () => {
                   <td className="px-6 py-4 text-sm text-gray-500">{ticket.service}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">{ticket.estimatedWaitTime}m</td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      ticket.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${ticket.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {ticket.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm">
                     {ticket.status === 'waiting' && (
                       <>
-                        <button 
+                        <button
                           onClick={() => handleTicketAction('call', ticket.tokenNumber)}
                           className="text-blue-600 hover:text-blue-900 mr-3"
                         >
                           Call
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleTicketAction('skip', ticket.tokenNumber)}
                           className="text-red-600 hover:text-red-900"
                         >
@@ -330,7 +329,7 @@ const AdminDashboard = () => {
                       </>
                     )}
                     {ticket.status === 'active' && (
-                      <button 
+                      <button
                         onClick={() => handleTicketAction('complete', ticket.tokenNumber)}
                         className="text-green-600 hover:text-green-900"
                       >
@@ -347,7 +346,7 @@ const AdminDashboard = () => {
 
       {/* Recent Activity & System Logs */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         <div>
           <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
           <div className="bg-white p-6 rounded-xl shadow-md">
@@ -370,25 +369,22 @@ const AdminDashboard = () => {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm">Server Status</span>
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                  systemStatus.server === 'Online' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${systemStatus.server === 'Online' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
                   {systemStatus.server || 'Online'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Database</span>
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                  systemStatus.database === 'Connected' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${systemStatus.database === 'Connected' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
                   {systemStatus.database || 'Connected'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Queue System</span>
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                  systemStatus.queueSystem === 'Running' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${systemStatus.queueSystem === 'Running' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
                   {systemStatus.queueSystem || 'Running'}
                 </span>
               </div>
@@ -413,7 +409,7 @@ const AdminDashboard = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
             <h3 className="text-xl font-bold mb-4">{modalType}</h3>
-            
+
             {modalType === 'User Management' && (
               <div>
                 <div className="space-y-2 mb-4">
@@ -426,12 +422,12 @@ const AdminDashboard = () => {
                 </div>
               </div>
             )}
-            
+
             {modalType !== 'User Management' && (
               <p className="text-gray-600 mb-6">This feature is under development.</p>
             )}
-            
-            <button 
+
+            <button
               onClick={() => setShowModal(false)}
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
             >

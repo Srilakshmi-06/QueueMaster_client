@@ -14,7 +14,7 @@ const Tickets = () => {
     const fetchServices = async () => {
         try {
             const token = localStorage.getItem('qmToken')
-            const res = await axios.get('http://localhost:5000/services', {
+            const res = await axios.get('https://queuemaster-server-1.onrender.com/services', {
                 headers: { Authorization: `Bearer ${token}` }
             })
             setServices(res.data.filter(service => service.isActive))
@@ -30,12 +30,12 @@ const Tickets = () => {
 
     useEffect(() => {
         fetchServices()
-        
+
         // Auto-refresh services every 10 seconds for ticket generation
         const interval = setInterval(() => {
             fetchServices()
         }, 10000)
-        
+
         return () => clearInterval(interval)
     }, [])
 
@@ -48,7 +48,7 @@ const Tickets = () => {
         setLoading(true)
         try {
             const token = localStorage.getItem('qmToken')
-            const res = await axios.post('http://localhost:5000/queue/generate', 
+            const res = await axios.post('https://queuemaster-server-1.onrender.com/queue/generate',
                 { service: selectedService },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
@@ -75,12 +75,11 @@ const Tickets = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {services.map((service) => (
-                        <div 
+                        <div
                             key={service._id || service}
                             onClick={() => setSelectedService(service.name || service)}
-                            className={`border rounded-xl p-4 hover:shadow-lg cursor-pointer transition ${
-                                selectedService === (service.name || service) ? 'border-blue-500 bg-blue-50' : ''
-                            }`}
+                            className={`border rounded-xl p-4 hover:shadow-lg cursor-pointer transition ${selectedService === (service.name || service) ? 'border-blue-500 bg-blue-50' : ''
+                                }`}
                         >
                             <h3 className="text-md font-bold text-gray-800">{service.name || service}</h3>
                             <p className="text-sm text-gray-500 mt-2">{service.description || 'Available now'}</p>

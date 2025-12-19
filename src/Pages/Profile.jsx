@@ -29,11 +29,11 @@ const Profile = () => {
     setLoading(true)
     try {
       const token = localStorage.getItem('qmToken')
-      const res = await axios.put('http://localhost:5000/queuemaster/profile', 
+      const res = await axios.put('https://queuemaster-server-1.onrender.com/queuemaster/profile',
         { name: user.name, email: user.email, ph_No: user.ph_No },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      
+
       // Update localStorage with new data
       localStorage.setItem('user', JSON.stringify(res.data.user))
       setMessage('Profile updated successfully!')
@@ -114,9 +114,8 @@ const Profile = () => {
 
           {/* Message */}
           {message && (
-            <div className={`mt-4 p-3 rounded text-center ${
-              message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-            }`}>
+            <div className={`mt-4 p-3 rounded text-center ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+              }`}>
               {message}
             </div>
           )}
