@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { LuEye, LuEyeClosed } from "react-icons/lu"
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Alert from '@mui/material/Alert'   // ✅ add
 
 const Signup = () => {
+    const navigate = useNavigate()
     const [showPassword, setShowPassword] = useState(false)
     const [showconfirmPassword, setShowConfirmPassword] = useState(false)
     const [name, setName] = useState('')
@@ -42,15 +44,13 @@ const Signup = () => {
 
             // ✅ success alert
             setStatus(true)
-            setMessage("Signup successful 🎉")
-            setTimeout(() => setStatus(false), 3000)
-
-            // reset form
-            setName('')
-            setEmail('')
-            setPhoneNo('')
-            setPassword('')
-            setConfirmPassword('')
+            setMessage("Signup successful 🎉 Redirecting to login...")
+            
+            // redirect to login after short delay
+            setTimeout(() => {
+                setStatus(false)
+                navigate('/login')
+            }, 2000)
 
         } catch (err) {
             setError(true)

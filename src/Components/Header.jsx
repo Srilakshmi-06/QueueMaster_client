@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import logo from '../assets/logo.png';
 import BasicMenu from './BasicMenu/BasicMenu';
 import { IoIosNotifications } from "react-icons/io";
 import { Link } from 'react-router-dom';
 
 const Header = () => {
+    const [user, setUser] = useState(null)
+
+    useEffect(() => {
+        const userData = localStorage.getItem('user')
+        if (userData) {
+            setUser(JSON.parse(userData))
+        }
+    }, [])
+
+    const isAdmin = user && user.role === 'admin'
+
     return (
         <header className="bg-linear-to-br from-purple-800 to-blue-900 text-white font-serif fixed w-full top-0 z-10 shadow-md rounded-b-2xl">
             <div className="max-w-7xl mx-auto flex items-center p-4 justify-around">
@@ -14,15 +25,19 @@ const Header = () => {
                 </div>
 
                 <ul className="flex space-x-6 text-lg font-medium">
-                    <Link to="/userdashboard">
+                    <Link to="/dashboard">
                         <li className="hover:text-indigo-600 cursor-pointer transition-colors duration-200">Home</li>
                     </Link>
-                    <Link to="/tickets">
-                        <li className="hover:text-indigo-600 cursor-pointer transition-colors duration-200">Tickets</li>
-                    </Link>
-                    <Link to="/queuestatus">
-                        <li className="hover:text-indigo-600 cursor-pointer transition-colors duration-200">Queue Status</li>
-                    </Link>
+                    {!isAdmin && (
+                        <>
+                            <Link to="/tickets">
+                                <li className="hover:text-indigo-600 cursor-pointer transition-colors duration-200">Tickets</li>
+                            </Link>
+                            <Link to="/queuestatus">
+                                <li className="hover:text-indigo-600 cursor-pointer transition-colors duration-200">Queue Status</li>
+                            </Link>
+                        </>
+                    )}
                     <Link to="/services">
                         <li className="hover:text-indigo-600 cursor-pointer transition-colors duration-200">Services</li>
                     </Link>

@@ -1,10 +1,139 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 const UserDashboard = () => {
+  const navigate = useNavigate()
+  const [showTicketModal, setShowTicketModal] = useState(false)
+  const [selectedService, setSelectedService] = useState('Consultation')
+  const [userTickets, setUserTickets] = useState([])
+  const [queueStatus, setQueueStatus] = useState([])
+  const [announcements, setAnnouncements] = useState([])
+  const [recentActivity, setRecentActivity] = useState([])
+
+  useEffect(() => {
+    fetchUserTickets()
+    fetchQueueStatus()
+    fetchAnnouncements()
+    
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(() => {
+      fetchUserTickets()
+      fetchQueueStatus()
+      fetchAnnouncements()
+    }, 5000)
+    
+    return () => clearInterval(interval)
+  }, [])
+
+  const fetchUserTickets = async () => {
+    try {
+      const token = localStorage.getItem('qmToken')
+      const res = await axios.get('http://localhost:5000/queue/my-tickets', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setUserTickets(res.data)
+    } catch (err) {
+      console.error('Error fetching tickets:', err)
+    }
+  }
+
+  const fetchQueueStatus = async () => {
+    try {
+      const token = localStorage.getItem('qmToken')
+      const res = await axios.get('http://localhost:5000/queue/status', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setQueueStatus(res.data)
+    } catch (err) {
+      console.error('Error fetching queue:', err)
+    }
+  }
+
+  const fetchAnnouncements = async () => {
+    try {
+      const token = localStorage.getItem('qmToken')
+      const res = await axios.get('http://localhost:5000/announcements', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setAnnouncements(res.data.slice(0, 3))
+    } catch (err) {
+      console.error('Error fetching announcements:', err)
+    }
+  }
+
+  useEffect(() => {
+    if (userTickets.length > 0) {
+      generateRecentActivity()
+    }
+  }, [userTickets])
+
+  const generateRecentActivity = () => {
+    const activities = []
+    
+    userTickets.slice(0, 3).forEach(ticket => {
+      activities.push({
+        id: ticket._id,
+        text: `🎟️ Token ${ticket.tokenNumber} generated`,
+        time: new Date(ticket.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+      })
+      
+      if (ticket.calledAt) {
+        activities.push({
+          id: `${ticket._id}-called`,
+          text: `📞 Token ${ticket.tokenNumber} called`,
+          time: new Date(ticket.calledAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        })
+      }
+    })
+    
+    activities.push({
+      id: 'queue-check',
+      text: '📊 Checked queue status',
+      time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    })
+    
+    setRecentActivity(activities.slice(0, 4))
+  }
+
+  const handleQuickAction = (action) => {
+    switch(action) {
+      case 'ticket':
+        navigate('/tickets')
+        break
+      case 'queue':
+        navigate('/queuestatus')
+        break
+      case 'notifications':
+        navigate('/notification')
+        break
+      case 'todo':
+        navigate('/todo')
+        break
+    }
+  }
+
+  const generateTicket = async () => {
+    try {
+      const token = localStorage.getItem('qmToken')
+      const res = await axios.post('http://localhost:5000/queue/generate', 
+        { service: selectedService },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      alert(res.data.message)
+      setShowTicketModal(false)
+      fetchUserTickets()
+      fetchQueueStatus()
+      fetchAnnouncements()
+    } catch (err) {
+      alert('Error generating ticket: ' + err.response?.data?.message)
+    }
+  }
+
   return (
     <div className="p-30 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">
-        Client Dashboard
+        Public Dashboard
       </h1>
 
       {/* Status Cards Section */}
@@ -18,7 +147,7 @@ const UserDashboard = () => {
           <div className="bg-white p-5 rounded-xl shadow-md">
             <p className="text-sm text-gray-500">Active Token</p>
             <h3 className="text-2xl font-bold text-blue-600 mt-2">
-              A12
+              {userTickets.length > 0 ? userTickets[0].tokenNumber : 'None'}
             </h3>
           </div>
 
@@ -26,7 +155,7 @@ const UserDashboard = () => {
           <div className="bg-white p-5 rounded-xl shadow-md">
             <p className="text-sm text-gray-500">Queue Position</p>
             <h3 className="text-xl font-bold text-green-600 mt-2">
-              You are 5th in line
+              {userTickets.length > 0 ? `Position ${userTickets[0].position}` : 'No active ticket'}
             </h3>
           </div>
 
@@ -34,7 +163,7 @@ const UserDashboard = () => {
           <div className="bg-white p-5 rounded-xl shadow-md">
             <p className="text-sm text-gray-500">Estimated Wait Time</p>
             <h3 className="text-xl font-bold text-orange-500 mt-2">
-              Approx. 15 minutes
+              {userTickets.length > 0 ? `${userTickets[0].estimatedWaitTime} min` : 'N/A'}
             </h3>
           </div>
 
@@ -42,15 +171,21 @@ const UserDashboard = () => {
           <div className="bg-white p-5 rounded-xl shadow-md">
             <p className="text-sm text-gray-500">Selected Service</p>
             <h3 className="text-xl font-bold text-purple-600 mt-2">
-              Consultation
+              {userTickets.length > 0 ? userTickets[0].service : 'None'}
             </h3>
           </div>
 
           {/* Queue Status */}
           <div className="bg-white p-5 rounded-xl shadow-md">
             <p className="text-sm text-gray-500">Queue Status</p>
-            <span className="inline-block mt-3 px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
-              Active
+            <span className={`inline-block mt-3 px-3 py-1 rounded-full text-sm font-semibold ${
+              userTickets.length > 0 && userTickets[0].status === 'active' 
+                ? 'bg-green-100 text-green-700' 
+                : userTickets.length > 0 && userTickets[0].status === 'waiting'
+                ? 'bg-yellow-100 text-yellow-700'
+                : 'bg-gray-100 text-gray-700'
+            }`}>
+              {userTickets.length > 0 ? userTickets[0].status : 'No ticket'}
             </span>
           </div>
 
@@ -65,7 +200,7 @@ const UserDashboard = () => {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-          <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition">
+          <div onClick={() => handleQuickAction('ticket')} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition">
             <h3 className="text-lg font-semibold text-blue-600">
               🎟️ Take Ticket
             </h3>
@@ -74,7 +209,7 @@ const UserDashboard = () => {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition">
+          <div onClick={() => handleQuickAction('queue')} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition">
             <h3 className="text-lg font-semibold text-green-600">
               📊 Track Queue
             </h3>
@@ -83,7 +218,7 @@ const UserDashboard = () => {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition">
+          <div onClick={() => handleQuickAction('notifications')} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition">
             <h3 className="text-lg font-semibold text-orange-500">
               🔔 Notifications
             </h3>
@@ -92,7 +227,7 @@ const UserDashboard = () => {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition">
+          <div onClick={() => handleQuickAction('todo')} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition">
             <h3 className="text-lg font-semibold text-purple-600">
               📝 My To-Do List
             </h3>
@@ -111,33 +246,45 @@ const UserDashboard = () => {
           Queue Progress
         </h2>
         <div className="bg-white p-6 rounded-xl shadow-md">
+          {userTickets.length > 0 && userTickets[0].status !== 'completed' ? (
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <p className="text-sm text-gray-500">Current Serving</p>
+                  <h3 className="text-xl font-bold text-blue-600">
+                    {queueStatus.find(t => t.status === 'active')?.tokenNumber || 'None'}
+                  </h3>
+                </div>
 
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <p className="text-sm text-gray-500">Current Token</p>
-              <h3 className="text-xl font-bold text-blue-600">A10</h3>
+                <div>
+                  <p className="text-sm text-gray-500">Your Token</p>
+                  <h3 className="text-xl font-bold text-green-600">{userTickets[0].tokenNumber}</h3>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+                <div
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                  style={{ 
+                    width: `${Math.max(10, Math.min(90, ((queueStatus.length - userTickets[0].position + 1) / queueStatus.length) * 100))}%` 
+                  }}
+                ></div>
+              </div>
+
+              <p className="text-sm text-gray-500">
+                {userTickets[0].status === 'active' 
+                  ? 'Your turn! Please proceed to the counter.' 
+                  : `${userTickets[0].position - 1} people ahead of you.`
+                }
+              </p>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No active ticket. Generate a new ticket to see progress.</p>
             </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Your Token</p>
-              <h3 className="text-xl font-bold text-green-600">A12</h3>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-            <div
-              className="bg-blue-600 h-3 rounded-full"
-              style={{ width: "70%" }}
-            ></div>
-          </div>
-
-          <p className="text-sm text-gray-500">
-            Almost there! Please be ready.
-          </p>
-
+          )}
         </div>
-
       </section>
 
       {/* Activity & Announcements */}
@@ -151,10 +298,14 @@ const UserDashboard = () => {
             <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
 
             <ul className="space-y-3 text-sm text-gray-600">
-              <li>🎟️ Token A12 generated (10:30 AM)</li>
-              <li>📊 Checked queue status</li>
-              <li>📝 Added a task to To-Do list</li>
-              <li>🔔 Viewed notification</li>
+              {recentActivity.length > 0 ? recentActivity.map((activity) => (
+                <li key={activity.id} className="flex justify-between">
+                  <span>{activity.text}</span>
+                  <span className="text-gray-400">({activity.time})</span>
+                </li>
+              )) : (
+                <li className="text-center text-gray-400 py-4">No recent activity</li>
+              )}
             </ul>
           </div>
 
@@ -168,22 +319,22 @@ const UserDashboard = () => {
             <h3 className="text-lg font-semibold mb-4">Announcements</h3>
 
             <ul className="space-y-3 text-sm text-gray-600">
+              {announcements.length > 0 ? announcements.map((announcement) => (
+                <li key={announcement._id}>
+                  📢 <strong>{announcement.title}</strong><br />
+                  <span className="text-xs text-gray-400">
+                    {announcement.message.substring(0, 50)}...
+                  </span>
+                </li>
+              )) : (
+                <li className="text-center text-gray-400 py-4">No announcements</li>
+              )}
+              
               <li>
-                📢 <strong>New Counter Added</strong><br />
-                <span className="text-xs text-gray-400">
-                  Service speed has been improved.
-                </span>
-              </li>
-
-              <li>
-                📢 <strong>Holiday Notice</strong><br />
-                <span className="text-xs text-gray-400">
-                  Office closed on Friday.
-                </span>
-              </li>
-
-              <li>
-                <span className="text-blue-600 text-sm cursor-pointer">
+                <span 
+                  onClick={() => navigate('/announcements')}
+                  className="text-blue-600 text-sm cursor-pointer hover:underline"
+                >
                   View all announcements →
                 </span>
               </li>
@@ -193,6 +344,41 @@ const UserDashboard = () => {
         </div>
 
       </section>
+
+      {/* Ticket Generation Modal */}
+      {showTicketModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold mb-4">Generate New Ticket</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Select Service:</label>
+              <select 
+                className="w-full p-2 border rounded"
+                value={selectedService}
+                onChange={(e) => setSelectedService(e.target.value)}
+              >
+                <option value="Consultation">Consultation</option>
+                <option value="Documentation">Documentation</option>
+                <option value="Support">Support</option>
+              </select>
+            </div>
+            <div className="flex gap-3">
+              <button 
+                onClick={generateTicket}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Generate Ticket
+              </button>
+              <button 
+                onClick={() => setShowTicketModal(false)}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   )

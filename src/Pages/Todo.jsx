@@ -6,12 +6,19 @@ import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FaEdit } from "react-icons/fa";
+import { FaCheckCircle } from "react-icons/fa";
 import axios from 'axios';
 
 const Todo = () => {
     const [todo, setTodo] = useState('')
     const [status, setStatus] = useState(false)
     const [todoArray, setTodoArray] = useState([]);
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("qmToken")}`
+        }
+    };
 
     useEffect(() => {
         getTodo()
@@ -22,7 +29,7 @@ const Todo = () => {
             alert("Enter Something!!")
             return;
         }
-        await axios.post("http://localhost:5000/todo/addtodo", { todo });
+        await axios.post("http://localhost:5000/todo/addtodo", { todo }, config);
         setTodo('')
         getTodo()
         setStatus(true)
@@ -30,12 +37,12 @@ const Todo = () => {
     }
 
     const getTodo = async () => {
-        const res = await axios.get("http://localhost:5000/todo/gettodo")
+        const res = await axios.get("http://localhost:5000/todo/gettodo", config)
         setTodoArray(res.data)
     }
 
     const deleteTodo = async (id) => {
-        await axios.delete(`http://localhost:5000/todo/deletetodo/${id}`)
+        await axios.delete(`http://localhost:5000/todo/deletetodo/${id}`, config)
         getTodo()
     }
 
@@ -48,10 +55,20 @@ const Todo = () => {
     const updateTodo = async (id, data) => {
         await axios.put(
             `http://localhost:5000/todo/updatetodo/${id}`,
-            { todo: data }
+            { todo: data }, config
         );
         getTodo();
     };
+
+    const toggleTodo = async (id) => {
+        await axios.patch(
+            `http://localhost:5000/todo/toggle/${id}`,
+            {},
+            config
+        );
+        getTodo();
+    };
+
 
     return (
         <div className="min-h-screen bg-white flex justify-center items-start py-30">
@@ -98,9 +115,25 @@ const Todo = () => {
                             key={r._id}
                             className="flex justify-between items-center bg-gray-100 px-4 py-3 rounded-lg shadow-sm hover:bg-gray-200 transition"
                         >
-                            <span className="text-gray-800 font-medium">
+                            <button
+                                onClick={() => toggleTodo(r._id)}
+                                className={`transition ${r.completed
+                                        ? "text-green-600"
+                                        : "text-gray-400 hover:text-green-600"
+                                    }`}
+                            >
+                                <FaCheckCircle size={18} />
+                            </button>
+
+                            <span
+                                className={`font-medium ${r.completed
+                                    ? "line-through text-gray-400"
+                                    : "text-gray-800"
+                                    }`}
+                            >
                                 {r.todo}
                             </span>
+
 
                             <div className="flex gap-3">
                                 <button

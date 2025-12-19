@@ -25,6 +25,7 @@ const Login = () => {
             )
 
             localStorage.setItem('qmToken', res.data.token)
+            localStorage.setItem('user', JSON.stringify(res.data.user))
 
             // ✅ success alert
             setStatus(true)
@@ -33,7 +34,7 @@ const Login = () => {
             // redirect after short delay
             setTimeout(() => {
                 setStatus(false)
-                navigate('/userdashboard')
+                navigate('/dashboard')
             }, 1500)
 
         } catch (err) {
@@ -105,6 +106,16 @@ const Login = () => {
                                 Login
                             </button>
                         </form>
+
+                        <div className='flex flex-row justify-center items-center gap-2 mt-2'>
+                            <p>Don't have an account?</p>
+                            <button 
+                                onClick={() => navigate('/signup')}
+                                className='text-blue-800 hover:underline'
+                            >
+                                Create an account
+                            </button>
+                        </div>
                     </div>
 
                     <div className='basis-150 rounded-r-2xl bg-linear-to-br from-purple-800 to-blue-900 text-white flex flex-col justify-center'>
