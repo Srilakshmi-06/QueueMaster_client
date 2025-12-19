@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { LuEye, LuEyeClosed } from "react-icons/lu"
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { Link, useNavigate } from 'react-router-dom'
 import Alert from '@mui/material/Alert'   // ✅ add
 
 const Signup = () => {
@@ -159,7 +160,7 @@ const Signup = () => {
                         <div className='flex flex-row justify-center items-center gap-2 mt-2'>
                             <p>Already have an account?</p>
                             <Link to="/login">
-                                <a className='text-blue-800'>Login</a>
+                                <p className='text-blue-800'>Login</p>
                             </Link>
                         </div>
                     </div>
