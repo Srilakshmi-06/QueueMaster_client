@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { LuEye, LuEyeClosed } from "react-icons/lu"
-import { useNavigate } from 'react-router-dom'
+import { useNavigate , Link} from 'react-router-dom'
 import axios from 'axios'
-import { Link, useNavigate } from 'react-router-dom'
 import Alert from '@mui/material/Alert'   // ✅ add
 
 const Signup = () => {
